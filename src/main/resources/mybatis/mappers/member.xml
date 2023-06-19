@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+      PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+   
+<mapper namespace="mapper.member">
+	<resultMap id="memberResult" type="memberVO">
+		<result property="userId" column="userId" />
+		<result property="userPwd" column="userPwd" />
+		<result property="userGrade" column="userGrade" />
+	</resultMap> 
+	<select id="findById" parameterType="memberVO" resultType="memberVO">
+		<![CDATA[
+			select * from usertwo
+			where userid = #{userId} and userPwd = #{userPwd}		
+		]]>
+	</select>
+	
+	
+</mapper>

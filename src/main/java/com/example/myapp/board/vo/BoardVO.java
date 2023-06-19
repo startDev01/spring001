@@ -1,0 +1,21 @@
+package com.example.myapp.board.vo;
+
+import org.springframework.stereotype.Component;
+
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+@Component
+@Getter
+@Setter
+@ToString
+public class BoardVO {
+	private int rownum;
+	private int bno;
+	private String bname;
+	private int bcount;
+	private String bwriter;
+	private String bdetail;
+	private String btype;
+}

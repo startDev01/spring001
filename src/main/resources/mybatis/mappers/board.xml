@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+      PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- <mapper namespace="mapper.member">
+	<resultMap id="memResult" type="memberVO">
+		<result property="id" column="id" />
+        <result property="pwd" column="pwd" />
+        <result property="name" column="name" />
+        <result property="email" column="email" />
+        <result property="joinDate" column="joinDate" />
+	</resultMap> 
+	
+	<resultMap id="memResult" type="java.util.HashMap">
+      <result property="id" column="id" />
+      <result property="pwd" column="pwd" />
+      <result property="name" column="name" />
+      <result property="email" column="email" />
+      <result property="joinDate" column="joinDate" />
+   </resultMap>
+
+
+	<select id="selectAllMemberList" resultMap="memResult">
+      <![CDATA[
+         select * from t_member	order by joinDate desc	 	
+      ]]>
+	</select>
+
+</mapper> -->
+
+<mapper namespace="mapper.board">
+	<resultMap id="boardResult" type="boardVO">
+		<result property="rownum" column="rownum" />
+		<result property="bno" column="bno" />
+    <result property="bname" column="bname" />
+    <result property="bcount" column="bcount" />
+    <result property="bwriter" column="bwriter" />
+    <result property="bdetail" column="bdetail" />
+	</resultMap> 
+	
+	<!-- <select id="selectAllBoardList" resultMap="boardResult">
+      <![CDATA[
+         select * from boardone	order by bno desc
+      ]]>
+	</select> -->
+	
+	<!-- <select id="selectAllBoardList" resultMap="boardResult">
+      <![CDATA[
+         select rownum, a.* from boardone a order by rownum desc	 	
+      ]]>
+	</select> -->
+			
+	<select id="getListPaging" parameterType="Criteria" resultType="BoardVO">
+			<![CDATA[
+					select rn, bno, bname, bcount, bwriter, btype, bdetail from(
+				    select rownum as rn, bno, bname, bcount, bwriter, btype, bdetail
+				  	from boardone where rownum <= #{pageNum} * #{amount} order by bno desc)
+					where rn > (#{pageNum} -1) * #{amount}
+      ]]>
+	</select>
+	
+	<!-- 게시글 총 개수 -->
+	<select id="getTotal" resultType="int">
+		<![CDATA[
+			select count(*) from boardone
+    ]]>
+	</select>
+	
+	<select id="selectAllNoticeList" resultMap="boardResult">
+      <![CDATA[
+         select rownum, a.* from boardone a where (btype='notice') order by rownum desc	 	
+      ]]>
+	</select>
+	
+	<select id="selectArticle" resultType="BoardVO" parameterType="int">
+      <![CDATA[
+         select * from boardone
+         where bno = #{bno}	 	
+      ]]>
+	</select>
+	
+	<insert id="createArticle" parameterType="BoardVO">
+		<![CDATA[
+			insert into boardone (bno, bname, bwriter, bdetail, btype)
+			values (boardone_seq.nextval, #{bname}, #{bwriter}, #{bdetail}, #{btype}) 
+    ]]>
+	</insert>
+	
+	<update id="bcountUp" parameterType="int">
+		<![CDATA[
+			UPDATE boardone
+			SET
+			bcount = bcount + 1
+			WHERE
+			bno = #{bno}
+    ]]>
+	</update>
+	
+	<update id="updateArticle" parameterType="boardVO">
+		<![CDATA[
+			UPDATE boardone
+			SET
+			bname = #{bname},
+			bdetail = #{bdetail}
+			WHERE
+			bno = #{bno}
+    ]]>
+	</update>
+	
+	<delete id="deleteArticle" parameterType="int">
+		<![CDATA[
+			DELETE FROM boardone WHERE bno = #{bno}
+		]]>
+	</delete>
+	
+	<!-- <insert id="insertNewArticle" parameterType="java.util.Map">
+		<![CDATA[
+			INSERT INTO boardone(bno, bname, bcount, bwriter)
+			VALUES( boardone_seq.NEXTVAL, #{bname}, default, #{bwriter})
+		]]>
+	</insert> -->
+</mapper>
+
