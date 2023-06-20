@@ -16,18 +16,20 @@ import com.example.myapp.board.vo.Criteria;
 //import com.spring.member.vo.MemberVO;
 
 public interface BoardController {
-	// ±âÁ¸ °Ô½Ã±Û ¸®½ºÆ® Ãâ·Â
-//	public ModelAndView listBoard(HttpServletRequest request, HttpServletResponse response) throws Exception;
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½Ô½Ã±ï¿½ ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½
+	public ModelAndView listBoard(HttpServletRequest request, HttpServletResponse response) throws Exception;
 
-	// ÆäÀÌÂ¡ Àû¿ë °Ô½Ã±Û ¸®½ºÆ® Ãâ·Â
-	public ModelAndView listBoardPaging(Criteria cri, HttpServletRequest request, HttpServletResponse response) throws Exception;
+	// ï¿½ï¿½ï¿½ï¿½Â¡ ï¿½ï¿½ï¿½ï¿½ ï¿½Ô½Ã±ï¿½ ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½
+//	public ModelAndView listBoardPaging(Criteria cri, HttpServletRequest request, HttpServletResponse response) throws Exception;
 //	public ModelAndView addMember(@ModelAttribute("info") MemberVO memberVO,HttpServletRequest request, HttpServletResponse response) throws Exception;
 //	public ModelAndView removeMember(@RequestParam("id") String id, HttpServletRequest request, HttpServletResponse response) throws Exception;
 	public ModelAndView viewArticle(@RequestParam("bno") int bno, HttpServletRequest request,
 			HttpServletResponse response) throws Exception;
 
 	public ModelAndView createArticle(@RequestParam("bname") String bname, @RequestParam("bwriter") String bwriter,
-			@RequestParam("bdetail") String bdetail, @RequestParam("btype") String btype, HttpServletRequest request, HttpServletResponse response)
+			@RequestParam("bdetail") String bdetail, @RequestParam("btype") String btype,
+									  MultipartHttpServletRequest multipartRequest,
+									  HttpServletRequest request, HttpServletResponse response)
 			throws Exception;
 	
 	public ModelAndView updateArticleForm(@RequestParam("bno") int bno,

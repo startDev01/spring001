@@ -31,25 +31,48 @@
 
 <mapper namespace="mapper.board">
 	<resultMap id="boardResult" type="boardVO">
-		<result property="rownum" column="rownum" />
+		<result property="level" column="level" />
 		<result property="bno" column="bno" />
-    <result property="bname" column="bname" />
-    <result property="bcount" column="bcount" />
-    <result property="bwriter" column="bwriter" />
-    <result property="bdetail" column="bdetail" />
-	</resultMap> 
-	
-	<!-- <select id="selectAllBoardList" resultMap="boardResult">
-      <![CDATA[
-         select * from boardone	order by bno desc
-      ]]>
-	</select> -->
+		<result property="bParentNO" column="bParentNO" />
+		<result property="bname" column="bname" />
+		<result property="bcount" column="bcount" />
+		<result property="bwriter" column="bwriter" />
+		<result property="bdetail" column="bdetail" />
+		<result property="bwritedate" column="bwritedate" />
+		<result property="bImageFileName" column="bImageFileName" />
+		<result property="bType" column="bType" />
+	</resultMap>
+<!--	<mapper namespace="mapper.board">-->
+<!--		<resultMap id="boardResult" type="boardVO">-->
+<!--			<result property="rownum" column="rownum" />-->
+<!--			<result property="bno" column="bno" />-->
+<!--			<result property="bname" column="bname" />-->
+<!--			<result property="bcount" column="bcount" />-->
+<!--			<result property="bwriter" column="bwriter" />-->
+<!--			<result property="bdetail" column="bdetail" />-->
+<!--		</resultMap>-->
+
+		<!-- <select id="selectAllBoardList" resultMap="boardResult">
+          <![CDATA[
+             select * from boardone	order by bno desc
+          ]]>
+        </select> -->
 	
 	<!-- <select id="selectAllBoardList" resultMap="boardResult">
       <![CDATA[
          select rownum, a.* from boardone a order by rownum desc	 	
       ]]>
 	</select> -->
+
+	<select id="selectAllBoardList" resultMap="boardResult">
+		<![CDATA[
+			SELECT level, bno, bParentNO, bName, bDetail, bwritedate, bImageFileName, bWriter
+			FROM boardtwo
+			START WITH bParentNO=0
+			CONNECT BY PRIOR bno = bParentNO
+			ORDER SIBLINGS BY bno DESC
+		]]>
+	</select>
 			
 	<select id="getListPaging" parameterType="Criteria" resultType="BoardVO">
 			<![CDATA[
@@ -63,7 +86,7 @@
 	<!-- 게시글 총 개수 -->
 	<select id="getTotal" resultType="int">
 		<![CDATA[
-			select count(*) from boardone
+			select count(*) from boardtwo
     ]]>
 	</select>
 	
@@ -75,17 +98,29 @@
 	
 	<select id="selectArticle" resultType="BoardVO" parameterType="int">
       <![CDATA[
-         select * from boardone
+         select * from boardtwo
          where bno = #{bno}	 	
       ]]>
 	</select>
 	
-	<insert id="createArticle" parameterType="BoardVO">
+	<!--<insert id="createArticle" parameterType="BoardVO">
 		<![CDATA[
 			insert into boardone (bno, bname, bwriter, bdetail, btype)
 			values (boardone_seq.nextval, #{bname}, #{bwriter}, #{bdetail}, #{btype}) 
     ]]>
+	</insert>-->
+	<insert id="createArticle" parameterType="BoardVO">
+		<![CDATA[
+		insert into boardtwo (bno, bname, bwriter, bdetail, btype)
+		values (#{bno}, #{bname}, #{bwriter}, #{bdetail}, #{btype})
+		]]>
 	</insert>
+
+	<select id="selectNewArticleNO" resultType="int">
+		<![CDATA[
+			SELECT nvl(max(bno, 0) + 1 from boardtwo
+		]]>
+	</select>
 	
 	<update id="bcountUp" parameterType="int">
 		<![CDATA[

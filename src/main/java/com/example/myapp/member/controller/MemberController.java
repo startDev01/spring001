@@ -39,7 +39,7 @@ public class MemberController {
 			HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
 		ModelAndView mav = new ModelAndView();
-		System.out.println("¾ÆÀÌµğ : "+ memberVO.getUserId());
+		System.out.println("ì„¸ì…˜ ë¡œê·¸ì¸ ID : "+ memberVO.getUserId());
 		
 		MemberVO userVO = memberService.findById(memberVO);
 		
@@ -79,7 +79,7 @@ public class MemberController {
 	
 	
 	@RequestMapping(value = "/member/*Form.do", method =  RequestMethod.GET)
-  private ModelAndView form(@RequestParam(value= "result", required=false) String result, // 95Çà¿¡¼­ º¸³½ °ªÀ» ÆÄ¶ó¹ÌÅÍ·Î °¡Á®¿È
+  private ModelAndView form(@RequestParam(value= "result", required=false) String result, // 95ï¿½à¿¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ä¶ï¿½ï¿½ï¿½Í·ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                         HttpServletRequest request, 
                         HttpServletResponse response) throws Exception {
      String viewName = (String)request.getAttribute("viewName");

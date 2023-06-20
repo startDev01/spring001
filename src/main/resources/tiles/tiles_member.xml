@@ -32,4 +32,8 @@
 		<put-attribute name="title" value="로그인" />
 		<put-attribute name="body" value="/WEB-INF/views/login.jsp" />
 	</definition>
+	<definition name="/articleForm" extends="baseLayout">
+		<put-attribute name="title" value="글쓰기창" />
+		<put-attribute name="body" value="/WEB-INF/views/articleForm.jsp" />
+	</definition>
 </tiles-definitions>

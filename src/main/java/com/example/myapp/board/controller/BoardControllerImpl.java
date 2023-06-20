@@ -1,8 +1,11 @@
 package com.example.myapp.board.controller;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
+import javax.servlet.Filter;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -13,6 +16,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.example.myapp.board.service.BoardService;
@@ -25,49 +30,52 @@ import com.example.myapp.board.vo.PageMakeVO;
 
 
 @Controller("boardController")
-public class BoardControllerImpl   implements BoardController {
+public class BoardControllerImpl implements BoardController {
+	private static final String ARTICLE_IMAGE_REPO = "C:\\board\\article_image";
 	@Autowired
 	private BoardService boardService;
 	@Autowired
 	BoardVO boardVO;
 //	@Autowired
 //	PageMakeVO pageMake;
-	
+
+
+	// 게시판 목록(FIX)
+	@Override
+	@RequestMapping(value="/board/listBoard.do" ,method = RequestMethod.GET)
+	public ModelAndView listBoard(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		String viewName = getViewName(request);
+		List boardList = boardService.listBoard();
+		// List noticeList = boardService.noticeListBoard();
+		ModelAndView mav = new ModelAndView(viewName);
+		// mav.addObject("noticeList", noticeList);
+		mav.addObject("boardList", boardList);
+		return mav;
+	}
+
+	// 게시판 목록(페이징)
 //	@Override
-//	@RequestMapping(value="/board/listBoard.do" ,method = RequestMethod.GET)
-//	public ModelAndView listBoard(HttpServletRequest request, HttpServletResponse response) throws Exception {
+//	@RequestMapping(value="/board/listBoard.do", method=RequestMethod.GET)
+//	public ModelAndView listBoardPaging(Criteria cri, HttpServletRequest request, HttpServletResponse response) throws Exception {
 //		String viewName = getViewName(request);
-//		List boardList = boardService.listBoard();
+//		// 게시글 목록 출력
+//		// List boardList = boardService.listBoard();
+//		List boardList = boardService.getListPaging(cri);
 //		List noticeList = boardService.noticeListBoard();
+//
+//		int total = boardService.getTotal();
+//
+//		System.out.println(viewName);
+//
+//		PageMakeVO pageMake = new PageMakeVO(cri, total);
+//
 //		ModelAndView mav = new ModelAndView(viewName);
 //		mav.addObject("noticeList", noticeList);
 //		mav.addObject("boardList", boardList);
+//		mav.addObject("pageMaker", pageMake);
+//
 //		return mav;
 //	}
-	
-	@Override
-	@RequestMapping(value="/board/listBoard.do", method=RequestMethod.GET)
-	public ModelAndView listBoardPaging(Criteria cri, HttpServletRequest request, HttpServletResponse response) throws Exception {
-		String viewName = getViewName(request);
-		// 게시글 목록 출력
-		// List boardList = boardService.listBoard();
-		List boardList = boardService.getListPaging(cri);
-		List noticeList = boardService.noticeListBoard();
-		
-		int total = boardService.getTotal();
-		
-		System.out.println(viewName);
-		
-		PageMakeVO pageMake = new PageMakeVO(cri, total);
-		
-		ModelAndView mav = new ModelAndView(viewName);
-		mav.addObject("noticeList", noticeList);
-		mav.addObject("boardList", boardList);
-		mav.addObject("pageMaker", pageMake);
-		
-		
-		return mav;
-	}
 	
 	@Override
 	@RequestMapping(value="/board/viewArticle.do", method=RequestMethod.GET)
@@ -106,6 +114,7 @@ public class BoardControllerImpl   implements BoardController {
 			@RequestParam("bwriter") String bwriter,
 			@RequestParam("bdetail") String bdetail,
 			@RequestParam("btype") String btype,
+			MultipartHttpServletRequest multipartRequest,
 			HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String viewName = getViewName(request);
 		
@@ -116,7 +125,10 @@ public class BoardControllerImpl   implements BoardController {
 		
 		boardService.createArticle(boardVO);
 		
-		// ������� �߰� ����
+		// 업로드한 이미지 파일 이름 가져오기
+		String imageFileName = upload(multipartRequest);
+		
+		// 게시판 추가
 		
 		ModelAndView mav = new ModelAndView(viewName);
 		mav.setViewName(viewName);
@@ -155,7 +167,7 @@ public class BoardControllerImpl   implements BoardController {
 		boardVO.setBname(bname);
 		boardVO.setBdetail(bdetail);
 		
-		System.out.println("�Խ��� ���� Ŭ�� �޼���" + boardVO);
+		System.out.println("boardVO 객체 확인용 : " + boardVO);
 		
 		boardService.updateArticle(boardVO);
 		
@@ -173,7 +185,7 @@ public class BoardControllerImpl   implements BoardController {
 		String viewName = getViewName(request);
 		
 		boardService.deleteArticle(bno);
-		System.out.println("�Խñ� ���� �Ϸ�");
+		System.out.println("게시판 삭제");
 		
 		ModelAndView mav = new ModelAndView(viewName);
 		mav.setViewName(viewName);
@@ -228,8 +240,26 @@ public class BoardControllerImpl   implements BoardController {
 		mav.setViewName(viewName);
 		return mav;
 	}
-	
-	
+
+	private String upload(MultipartHttpServletRequest multipartRequest) throws Exception {
+		String imageFileName = null;
+		Iterator<String> fileNames = multipartRequest.getFileNames();
+		while (fileNames.hasNext()) {
+			String fileName = fileNames.next();
+			MultipartFile mFile = multipartRequest.getFile(fileName);
+			imageFileName = mFile.getOriginalFilename();
+			File file = new File(ARTICLE_IMAGE_REPO + "\\" + "temp" + "\\" + fileNames);
+			if(mFile.getSize() != 0) {
+				if(!file.exists()) {
+					file.getParentFile().mkdirs();
+					mFile.transferTo(new File(ARTICLE_IMAGE_REPO + "\\" + "temp" + "\\" + imageFileName));
+				}
+			}
+		}
+		
+		// 리턴값 확인 요망
+		return imageFileName;
+	}
 
 	private String getViewName(HttpServletRequest request) throws Exception {
 		String contextPath = request.getContextPath();
