@@ -66,6 +66,9 @@ public class MemberController {
 		session.removeAttribute("member");
 		session.removeAttribute("isLogOn");
 		
+		// 조회수 증가용 세션값 삭제
+		session.removeAttribute("bnoArr");
+		
 		String viewName = getViewName(request);
 		
 		ModelAndView mav = new ModelAndView(viewName);

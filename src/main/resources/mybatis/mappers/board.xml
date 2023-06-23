@@ -32,6 +32,7 @@
 <mapper namespace="mapper.board">
 	<resultMap id="boardResult" type="boardVO">
 		<result property="level" column="level" />
+		<result property="rownum" column="rownum" />
 		<result property="bno" column="bno" />
 		<result property="bParentNO" column="bParentNO" />
 		<result property="bname" column="bname" />
@@ -40,7 +41,7 @@
 		<result property="bdetail" column="bdetail" />
 		<result property="bwritedate" column="bwritedate" />
 		<result property="bImageFileName" column="bImageFileName" />
-		<result property="bType" column="bType" />
+		<result property="btype" column="btype" />
 	</resultMap>
 <!--	<mapper namespace="mapper.board">-->
 <!--		<resultMap id="boardResult" type="boardVO">-->
@@ -66,14 +67,14 @@
 
 	<select id="selectAllBoardList" resultMap="boardResult">
 		<![CDATA[
-			SELECT level, bno, bParentNO, bName, bDetail, bwritedate, bImageFileName, bWriter
+			SELECT level, bno, bParentNO, bName, bDetail, bwritedate, bImageFileName, bWriter, bcount
 			FROM boardtwo
 			START WITH bParentNO=0
 			CONNECT BY PRIOR bno = bParentNO
 			ORDER SIBLINGS BY bno DESC
 		]]>
 	</select>
-			
+
 	<select id="getListPaging" parameterType="Criteria" resultType="BoardVO">
 			<![CDATA[
 					select rn, bno, bname, bcount, bwriter, btype, bdetail from(
@@ -92,7 +93,7 @@
 	
 	<select id="selectAllNoticeList" resultMap="boardResult">
       <![CDATA[
-         select rownum, a.* from boardone a where (btype='notice') order by rownum desc	 	
+         select rownum, a.* from boardtwo a where (btype='notice') order by rownum asc
       ]]>
 	</select>
 	
@@ -111,20 +112,20 @@
 	</insert>-->
 	<insert id="createArticle" parameterType="BoardVO">
 		<![CDATA[
-		insert into boardtwo (bno, bname, bwriter, bdetail, btype)
-		values (#{bno}, #{bname}, #{bwriter}, #{bdetail}, #{btype})
+			insert into boardtwo (bno, bname, bwriter, bdetail, btype)
+			values (#{bno}, #{bname}, #{bwriter}, #{bdetail}, #{btype})
 		]]>
 	</insert>
 
 	<select id="selectNewArticleNO" resultType="int">
 		<![CDATA[
-			SELECT nvl(max(bno, 0) + 1 from boardtwo
+			SELECT nvl(max(bno), 0) + 1 from boardtwo
 		]]>
 	</select>
 	
 	<update id="bcountUp" parameterType="int">
 		<![CDATA[
-			UPDATE boardone
+			UPDATE boardtwo
 			SET
 			bcount = bcount + 1
 			WHERE
@@ -134,7 +135,7 @@
 	
 	<update id="updateArticle" parameterType="boardVO">
 		<![CDATA[
-			UPDATE boardone
+			UPDATE boardtwo
 			SET
 			bname = #{bname},
 			bdetail = #{bdetail}
@@ -145,7 +146,7 @@
 	
 	<delete id="deleteArticle" parameterType="int">
 		<![CDATA[
-			DELETE FROM boardone WHERE bno = #{bno}
+			DELETE FROM boardtwo WHERE bno = #{bno}
 		]]>
 	</delete>
 	

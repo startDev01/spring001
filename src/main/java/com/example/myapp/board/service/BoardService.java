@@ -14,14 +14,15 @@ public interface BoardService {
 	 public List noticeListBoard() throws DataAccessException;
 	 public BoardVO selectArticle(int bno) throws DataAccessException;
 	 public void createArticle(BoardVO boardVO) throws DataAccessException;
+	 public int selectNewArticleBno() throws  DataAccessException;
 	 public void bcountUp(int bno) throws DataAccessException;
 	 public void updateArticle(BoardVO articleVO) throws DataAccessException;
 	 public void deleteArticle(int bno) throws DataAccessException;
 	 
-	 // ÆäÀÌÂ¡ Àû¿ëÇÑ °Ô½ÃÆÇ ¸ñ·Ï
+	 // ï¿½ï¿½ï¿½ï¿½Â¡ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ô½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
 	 public List<BoardVO> getListPaging(Criteria cri);
 	 
-	 // °Ô½ÃÆÇ ¸ñ·Ï ÃÑ °³¼ö
+	 // ï¿½Ô½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	 public int getTotal();
 //	 public int addMember(MemberVO memberVO) throws DataAccessException;
 //	 public int removeMember(String id) throws DataAccessException;

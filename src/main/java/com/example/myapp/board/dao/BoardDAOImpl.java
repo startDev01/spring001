@@ -43,7 +43,14 @@ public class BoardDAOImpl implements BoardDAO {
 
 	@Override
 	public void createArticle(BoardVO boardVO) {
+		int bno = selectNewArticleNO();
+		boardVO.setBno(bno);
 		sqlSession.selectOne("mapper.board.createArticle",boardVO);
+	}
+
+	@Override
+	public int selectNewArticleBno() throws DataAccessException {
+		return sqlSession.selectOne("mapper.board.selectNewArticleNO");
 	}
 
 	@Override
@@ -71,6 +78,11 @@ public class BoardDAOImpl implements BoardDAO {
 	public int getTotal() {
 		int total = sqlSession.selectOne("mapper.board.getTotal");
 		return total;
+	}
+
+	private int selectNewArticleNO() throws DataAccessException {
+		System.out.println("게시판 글 마지막 번호 출력");
+		return sqlSession.selectOne("mapper.board.selectNewArticleNO");
 	}
 	
 	

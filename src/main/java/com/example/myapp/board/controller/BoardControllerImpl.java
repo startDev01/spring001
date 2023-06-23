@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.example.myapp.member.vo.MemberVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,19 +37,35 @@ public class BoardControllerImpl implements BoardController {
 	private BoardService boardService;
 	@Autowired
 	BoardVO boardVO;
+	@Autowired
+	MemberVO memberVO;
+
+	ArrayList<Integer> bnoArr;
 //	@Autowired
 //	PageMakeVO pageMake;
-
 
 	// 게시판 목록(FIX)
 	@Override
 	@RequestMapping(value="/board/listBoard.do" ,method = RequestMethod.GET)
 	public ModelAndView listBoard(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String viewName = getViewName(request);
+		
+		// 일반 게시글 목록 서비스 호출
 		List boardList = boardService.listBoard();
-		// List noticeList = boardService.noticeListBoard();
+		
+		// 공지 게시글 목록 서비스 호출
+		List noticeList = boardService.noticeListBoard();
+
+		// 비로그인시 조회수용 세션 초기화
+		HttpSession session = request.getSession();
+		System.out.println(session.getAttribute("isLogOn"));
+		if(session.getAttribute("isLogOn") == null) {
+			System.out.println("비로그인 상태, 중복확인 배열 초기화");
+			bnoArr = null;
+		}
+
 		ModelAndView mav = new ModelAndView(viewName);
-		// mav.addObject("noticeList", noticeList);
+		mav.addObject("noticeList", noticeList);
 		mav.addObject("boardList", boardList);
 		return mav;
 	}
@@ -88,14 +105,41 @@ public class BoardControllerImpl implements BoardController {
 		HttpSession session = request.getSession();
 		System.out.println("Session 값 : " + session.getAttribute("member")
 											+ " /// " + session.getAttribute("isLogOn"));
-		boolean isLogOn = false;
 
-
-		// 조회수 증가
-		if(isLogOn) {
-			boardService.bcountUp(bno);
+		// bnoArr 정수 배열이 없다면 인스턴스 생성
+		if(bnoArr == null) {
+			bnoArr = new ArrayList<Integer>();
 		}
-		
+
+		// 로그인 세션 확인
+		if((session.getAttribute("isLogOn")) != null) {
+			System.out.println("로그인 상태입니다.");
+			session.setAttribute("bnoArr", bnoArr);
+			boolean bnoCheck = false;
+
+			// 배열에 저장된 글번호 중복 확인
+			for (Integer bnoInArr : bnoArr) {
+				if (bnoInArr == bno) {
+					System.out.println("중복된 세션 감지, 조회수 증가 X");
+					bnoCheck = true;
+				}
+			}
+
+			// 조회수 증가(Session 값에 따라 조회수 증가 제한)
+			if (!bnoCheck) {
+				System.out.println("조회수 증가함");
+				boardService.bcountUp(bno);
+
+				// 객체 배열에 해당 글번호 추가
+				bnoArr.add(bno);
+				session.setAttribute("bnoArr", bnoArr);
+			}
+		} else {
+			// 비 로그인 상태시 bnoArr 배열 전부 삭제
+			System.out.println("비 로그인 상태입니다.");
+			bnoArr = null;
+		}
+
 		// 게시글 조회
 		BoardVO articleVO = boardService.selectArticle(bno);
 		
@@ -114,19 +158,20 @@ public class BoardControllerImpl implements BoardController {
 			@RequestParam("bwriter") String bwriter,
 			@RequestParam("bdetail") String bdetail,
 			@RequestParam("btype") String btype,
-			MultipartHttpServletRequest multipartRequest,
 			HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String viewName = getViewName(request);
-		
+		System.out.println("글쓰기");
+
 		boardVO.setBname(bname);
 		boardVO.setBwriter(bwriter);
 		boardVO.setBdetail(bdetail);
 		boardVO.setBtype(btype);
+
+		int bno = boardService.selectNewArticleBno();
+
+		boardVO.setBno(bno);
 		
 		boardService.createArticle(boardVO);
-		
-		// 업로드한 이미지 파일 이름 가져오기
-		String imageFileName = upload(multipartRequest);
 		
 		// 게시판 추가
 		
@@ -134,6 +179,32 @@ public class BoardControllerImpl implements BoardController {
 		mav.setViewName(viewName);
 		mav.addObject("boardVO", boardVO);
 		
+		return mav;
+	}
+
+
+	@Override
+	@RequestMapping(value = "/board/articleForm.do", method =  RequestMethod.GET)
+	public ModelAndView articleForm(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		String viewName = getViewName(request);
+
+		// 게시글 끝번호 + 1 서비스 조회
+		int bno = boardService.selectNewArticleBno();
+		
+		// 로그인 확인
+		HttpSession session = request.getSession();
+		if(session.getAttribute("member") == null) {
+			System.out.println("비로그인, 로그인폼 진입 불가");
+			request.setAttribute("msg", "로그인이 필요합니다.");
+			request.setAttribute("url", "/myapp/board/listBoard.do");
+			viewName = "alert";
+		}
+		
+		ModelAndView mav = new ModelAndView();
+		mav.setViewName(viewName);
+		if(session.getAttribute("member") != null) {
+			mav.addObject("bno", bno);
+		}
 		return mav;
 	}
 	
@@ -145,13 +216,13 @@ public class BoardControllerImpl implements BoardController {
 		
 		System.out.println("게시판 수정 페이지");
 		
+		// 해당 bno의 게시글 조회
 		BoardVO articleVO = boardService.selectArticle(bno);
 		
 		ModelAndView mav = new ModelAndView(viewName);
 		mav.setViewName(viewName);
 		mav.addObject("articleVO", articleVO);
 
-		
 		return mav;
 	}
 	
@@ -163,6 +234,7 @@ public class BoardControllerImpl implements BoardController {
 			HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String viewName = getViewName(request);
 		
+		// boardVO에 데이터 저장 후 서비스 호출
 		boardVO.setBno(bno);
 		boardVO.setBname(bname);
 		boardVO.setBdetail(bdetail);
@@ -170,8 +242,7 @@ public class BoardControllerImpl implements BoardController {
 		System.out.println("boardVO 객체 확인용 : " + boardVO);
 		
 		boardService.updateArticle(boardVO);
-		
-		
+
 		ModelAndView mav = new ModelAndView(viewName);
 		mav.setViewName(viewName);
 		
@@ -184,6 +255,7 @@ public class BoardControllerImpl implements BoardController {
 			HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String viewName = getViewName(request);
 		
+		// delete 서비스 호출
 		boardService.deleteArticle(bno);
 		System.out.println("게시판 삭제");
 		

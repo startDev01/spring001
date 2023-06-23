@@ -50,6 +50,12 @@ public class BoardServiceImpl implements BoardService {
 	}
 
 	@Override
+	public int selectNewArticleBno() throws DataAccessException {
+		System.out.println("게시물 끝 추가 번호 메소드 실행");
+		return boardDAO.selectNewArticleBno();
+	}
+
+	@Override
 	public void bcountUp(int bno) throws DataAccessException {
 		boardDAO.bcountUp(bno);
 		System.out.println("조회수 메소드 실행");

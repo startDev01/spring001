@@ -13,7 +13,7 @@ import java.sql.Date;
 @Setter
 @ToString
 public class BoardVO {
-	// private int rownum;
+	private int rownum;
 	private int level;
 	private int bno;
 	private int bParentNO;
