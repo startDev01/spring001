@@ -14,6 +14,7 @@ public interface BoardService {
 	 public List noticeListBoard() throws DataAccessException;
 	 public BoardVO selectArticle(int bno) throws DataAccessException;
 	 public void createArticle(BoardVO boardVO) throws DataAccessException;
+	 public void replyArticle(BoardVO boardVO) throws DataAccessException;
 	 public int selectNewArticleBno() throws  DataAccessException;
 	 public void bcountUp(int bno) throws DataAccessException;
 	 public void updateArticle(BoardVO articleVO) throws DataAccessException;

@@ -117,6 +117,13 @@
 		]]>
 	</insert>
 
+	<insert id="replyArticle" parameterType="boardVO">
+		<![CDATA[
+			insert into boardtwo (bno, bParentNO, bname, bwriter, bdetail, btype)
+			values (#{bno}, #{bParentNO}, #{bname}, #{bwriter}, #{bdetail}, #{btype})
+		]]>
+	</insert>
+
 	<select id="selectNewArticleNO" resultType="int">
 		<![CDATA[
 			SELECT nvl(max(bno), 0) + 1 from boardtwo

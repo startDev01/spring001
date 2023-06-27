@@ -14,6 +14,7 @@ import javax.servlet.http.HttpSession;
 import com.example.myapp.member.vo.MemberVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -49,10 +50,10 @@ public class BoardControllerImpl implements BoardController {
 	@RequestMapping(value="/board/listBoard.do" ,method = RequestMethod.GET)
 	public ModelAndView listBoard(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String viewName = getViewName(request);
-		
+
 		// 일반 게시글 목록 서비스 호출
 		List boardList = boardService.listBoard();
-		
+
 		// 공지 게시글 목록 서비스 호출
 		List noticeList = boardService.noticeListBoard();
 
@@ -93,18 +94,18 @@ public class BoardControllerImpl implements BoardController {
 //
 //		return mav;
 //	}
-	
+
 	@Override
 	@RequestMapping(value="/board/viewArticle.do", method=RequestMethod.GET)
 	public ModelAndView viewArticle(@RequestParam("bno") int bno,
-			HttpServletRequest request, HttpServletResponse response) throws Exception {
+									HttpServletRequest request, HttpServletResponse response) throws Exception {
 		System.out.println("viewArticle!!!");
 		String viewName = getViewName(request);
-		
+
 		// 세션 값 확인
 		HttpSession session = request.getSession();
 		System.out.println("Session 값 : " + session.getAttribute("member")
-											+ " /// " + session.getAttribute("isLogOn"));
+				+ " /// " + session.getAttribute("isLogOn"));
 
 		// bnoArr 정수 배열이 없다면 인스턴스 생성
 		if(bnoArr == null) {
@@ -142,23 +143,23 @@ public class BoardControllerImpl implements BoardController {
 
 		// 게시글 조회
 		BoardVO articleVO = boardService.selectArticle(bno);
-		
+
 		System.out.println(articleVO);
-		
+
 		ModelAndView mav = new ModelAndView(viewName);
 		mav.setViewName(viewName);
 		mav.addObject("articleVO", articleVO);
-		
+
 		return mav;
 	}
-	
+
 	@Override
 	@RequestMapping(value="/board/addArticle.done", method=RequestMethod.POST)
 	public ModelAndView createArticle(@RequestParam("bname") String bname,
-			@RequestParam("bwriter") String bwriter,
-			@RequestParam("bdetail") String bdetail,
-			@RequestParam("btype") String btype,
-			HttpServletRequest request, HttpServletResponse response) throws Exception {
+									  @RequestParam("bwriter") String bwriter,
+									  @RequestParam("bdetail") String bdetail,
+									  @RequestParam("btype") String btype,
+									  HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String viewName = getViewName(request);
 		System.out.println("글쓰기");
 
@@ -170,15 +171,15 @@ public class BoardControllerImpl implements BoardController {
 		int bno = boardService.selectNewArticleBno();
 
 		boardVO.setBno(bno);
-		
+
 		boardService.createArticle(boardVO);
-		
+
 		// 게시판 추가
-		
+
 		ModelAndView mav = new ModelAndView(viewName);
 		mav.setViewName(viewName);
 		mav.addObject("boardVO", boardVO);
-		
+
 		return mav;
 	}
 
@@ -190,100 +191,132 @@ public class BoardControllerImpl implements BoardController {
 
 		// 게시글 끝번호 + 1 서비스 조회
 		int bno = boardService.selectNewArticleBno();
-		
+
 		// 로그인 확인
 		HttpSession session = request.getSession();
 		if(session.getAttribute("member") == null) {
 			System.out.println("비로그인, 로그인폼 진입 불가");
 			request.setAttribute("msg", "로그인이 필요합니다.");
-			request.setAttribute("url", "/myapp/board/listBoard.do");
+			request.setAttribute("url", "/myapp/member/login");
 			viewName = "alert";
 		}
-		
+
 		ModelAndView mav = new ModelAndView();
 		mav.setViewName(viewName);
+
+		// 로그인 상태시 게시글 끝번호 프론트로 넘김
 		if(session.getAttribute("member") != null) {
 			mav.addObject("bno", bno);
 		}
 		return mav;
 	}
-	
+
 	@Override
 	@RequestMapping(value="/board/updateArticleForm", method=RequestMethod.GET)
 	public ModelAndView updateArticleForm(@RequestParam("bno") int bno,
-			HttpServletRequest request, HttpServletResponse response) throws Exception {
+										  HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String viewName = getViewName(request);
-		
+
 		System.out.println("게시판 수정 페이지");
-		
+
 		// 해당 bno의 게시글 조회
 		BoardVO articleVO = boardService.selectArticle(bno);
-		
+
 		ModelAndView mav = new ModelAndView(viewName);
 		mav.setViewName(viewName);
 		mav.addObject("articleVO", articleVO);
 
 		return mav;
 	}
-	
+
 	@Override
 	@RequestMapping(value="/board/updateArticle", method=RequestMethod.POST)
 	public ModelAndView updateArticle(@RequestParam("bno") int bno,
-			@RequestParam("bname") String bname,
-			@RequestParam("bdetail") String bdetail,
-			HttpServletRequest request, HttpServletResponse response) throws Exception {
+									  @RequestParam("bname") String bname,
+									  @RequestParam("bdetail") String bdetail,
+									  HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String viewName = getViewName(request);
-		
+
 		// boardVO에 데이터 저장 후 서비스 호출
 		boardVO.setBno(bno);
 		boardVO.setBname(bname);
 		boardVO.setBdetail(bdetail);
-		
+
 		System.out.println("boardVO 객체 확인용 : " + boardVO);
-		
+
 		boardService.updateArticle(boardVO);
 
 		ModelAndView mav = new ModelAndView(viewName);
 		mav.setViewName(viewName);
-		
+
 		return mav;
 	}
-	
+
 	@Override
 	@RequestMapping(value="/board/deleteArticle.do", method=RequestMethod.GET)
 	public ModelAndView deleteArticle(@RequestParam("bno") int bno,
-			HttpServletRequest request, HttpServletResponse response) throws Exception {
+									  HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String viewName = getViewName(request);
-		
+
 		// delete 서비스 호출
 		boardService.deleteArticle(bno);
 		System.out.println("게시판 삭제");
-		
+
 		ModelAndView mav = new ModelAndView(viewName);
 		mav.setViewName(viewName);
-		
+
 		return mav;
 	}
-	
+
 	public ModelAndView loginArticle(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String viewName = getViewName(request);
-		
-		
-		
+
 		ModelAndView mav = new ModelAndView(viewName);
 		mav.setViewName(viewName);
-		
+
 		return mav;
 	}
-	
-	
-	
-	
-	
-	
-	
 
-//	@Override
+	@Override
+	@RequestMapping(value = "/board/replyArticle.do", method = RequestMethod.POST)
+	public ModelAndView replyArticle(@ModelAttribute("boardVO") BoardVO boardVO,
+									 HttpServletRequest request, HttpServletResponse response) throws Exception {
+		String viewName = getViewName(request);
+
+		// 넘어온 객체 boardVO 값 확인
+		// tip) JSP에서 태그를 disabled로 비활성화 시키면 값도 안넘어온다..
+		System.out.println("replyArticle boardVO -> " + boardVO);
+
+		// 답글 등록 서비스 호출
+		boardService.replyArticle(boardVO);
+		System.out.println("답글 등록 완료");
+
+		ModelAndView mav = new ModelAndView(viewName);
+		mav.setViewName(viewName);
+
+		return mav;
+	}
+
+	@Override
+	@RequestMapping(value = "/board/replyArticle", method = RequestMethod.GET)
+	public ModelAndView replyArticle(@RequestParam("bno") int bno,
+										 HttpServletRequest request, HttpServletResponse response) throws Exception {
+		String viewName = getViewName(request);
+
+
+		int replyBno = boardService.selectNewArticleBno();
+		System.out.println("답글 등록할 게시판 번호 : " + replyBno);
+
+		ModelAndView mav = new ModelAndView(viewName);
+
+		mav.addObject("bno", bno);
+		mav.addObject("replyBno", replyBno);
+		mav.setViewName(viewName);
+
+		return mav;
+	}
+
+	//	@Override
 //	@RequestMapping(value="/member/addMember.do" ,method = RequestMethod.POST)
 //	public ModelAndView addMember(@ModelAttribute("member") MemberVO member,
 //			                  HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -303,7 +336,7 @@ public class BoardControllerImpl implements BoardController {
 //		ModelAndView mav = new ModelAndView("redirect:/member/listMembers.do");
 //		return mav;
 //	}
-	
+
 	/*@RequestMapping(value = { "/member/loginForm.do", "/member/memberForm.do" }, method =  RequestMethod.GET)*/
 	@RequestMapping(value = "/board/*Form.do", method =  RequestMethod.GET)
 	public ModelAndView form(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -328,7 +361,7 @@ public class BoardControllerImpl implements BoardController {
 				}
 			}
 		}
-		
+
 		// 리턴값 확인 요망
 		return imageFileName;
 	}
@@ -363,5 +396,4 @@ public class BoardControllerImpl implements BoardController {
 		}
 		return viewName;
 	}
-
 }

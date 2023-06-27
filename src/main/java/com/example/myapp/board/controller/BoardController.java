@@ -42,4 +42,11 @@ public interface BoardController {
 	
 	public ModelAndView deleteArticle(@RequestParam("bno")int bno,
 			HttpServletRequest request, HttpServletResponse response) throws Exception;
+
+	public ModelAndView replyArticle(@ModelAttribute("boardVO") BoardVO boardVO,
+			HttpServletRequest request, HttpServletResponse response) throws Exception;
+
+	public ModelAndView replyArticle(@RequestParam("bno") int bno,
+			HttpServletRequest request, HttpServletResponse response) throws Exception;
+
 }

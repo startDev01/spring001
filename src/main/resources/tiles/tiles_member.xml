@@ -36,4 +36,8 @@
 		<put-attribute name="title" value="글쓰기창" />
 		<put-attribute name="body" value="/WEB-INF/views/articleForm.jsp" />
 	</definition>
+	<definition name="/replyArticle" extends="baseLayout">
+		<put-attribute name="title" value="답글쓰기창" />
+		<put-attribute name="body" value="/WEB-INF/views/replyArticle.jsp" />
+	</definition>
 </tiles-definitions>

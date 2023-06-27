@@ -49,6 +49,13 @@ public class BoardDAOImpl implements BoardDAO {
 	}
 
 	@Override
+	public void replyArticle(BoardVO boardVO) {
+		int bno = selectNewArticleNO();
+		boardVO.setBno(bno);
+		sqlSession.insert("mapper.board.replyArticle", boardVO);
+	}
+
+	@Override
 	public int selectNewArticleBno() throws DataAccessException {
 		return sqlSession.selectOne("mapper.board.selectNewArticleNO");
 	}

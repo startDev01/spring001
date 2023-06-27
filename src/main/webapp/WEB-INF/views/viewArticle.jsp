@@ -27,7 +27,7 @@
 		<p>제목 <input type="text" value="${articleVO.bname}" disabled>	
 		<p>내용 <textarea cols="60" rows="20" style="resize: none;" disabled>${articleVO.bdetail}</textarea>	<br>
 
-		<a href="${pageContext.request.contextPath}/#/${articleVO.bno}">답글달기</a>
+		<a href="${pageContext.request.contextPath}/board/replyArticle?bno=${articleVO.bno}">답글달기</a>
 		<a href="${pageContext.request.contextPath}/board/updateArticleForm?bno=${articleVO.bno}">글 수정하기</a>
 		<a href="${pageContext.request.contextPath}/board/listBoard.do">게시판 목록</a>
 		<a href="${pageContext.request.contextPath}/board/deleteArticle.do?bno=${articleVO.bno}">글 삭제</a>

@@ -14,16 +14,17 @@ public interface BoardDAO {
 	 public List selectAllBoardList() throws DataAccessException;
 	 public List selectAllNoticeList() throws DataAccessException;
 	 public BoardVO selectArticle(int bno) throws DataAccessException;
-	 public void createArticle(BoardVO boardVO) throws DataAccessException;
-	 public int selectNewArticleBno() throws DataAccessException;
-	 public void bcountUp(int bno) throws DataAccessException;
-	 public void updateArticle(BoardVO articleVO) throws DataAccessException;
-	 public void deleteArticle(int bno) throws DataAccessException;
-	 
-	 // ����¡ ������ �Խ��� ���
+	public void createArticle(BoardVO boardVO) throws DataAccessException;
+	public void replyArticle(BoardVO boardVO) throws DataAccessException;
+	public int selectNewArticleBno() throws DataAccessException;
+	public void bcountUp(int bno) throws DataAccessException;
+	public void updateArticle(BoardVO articleVO) throws DataAccessException;
+	public void deleteArticle(int bno) throws DataAccessException;
+
+	 // 페이징 처리 DAO
 	 public List<BoardVO> getListPaging(Criteria cri);
 	 
-	 // �Խ��� ��� �� ����
+	 // 게시글 총 개수
 	 public int getTotal();
 //	 public int insertMember(MemberVO memberVO) throws DataAccessException ;
 //	 public int deleteMember(String id) throws DataAccessException;
