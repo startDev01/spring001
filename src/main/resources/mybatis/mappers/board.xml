@@ -75,15 +75,6 @@
 		]]>
 	</select>
 
-	<select id="getListPaging" parameterType="Criteria" resultType="BoardVO">
-			<![CDATA[
-					select rn, bno, bname, bcount, bwriter, btype, bdetail from(
-				    select rownum as rn, bno, bname, bcount, bwriter, btype, bdetail
-				  	from boardone where rownum <= #{pageNum} * #{amount} order by bno desc)
-					where rn > (#{pageNum} -1) * #{amount}
-      ]]>
-	</select>
-	
 	<!-- 게시글 총 개수 -->
 	<select id="getTotal" resultType="int">
 		<![CDATA[

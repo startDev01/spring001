@@ -12,8 +12,8 @@
         <input type="number" name="bno" value="${replyBno}" hidden>
         <br>
         글 내용 : <textarea rows="20" cols="60" name="bdetail" style="resize: none;" required></textarea><br>
-        <input type="number" name="bParentNO" value="${bno}" readonly>
-        <input type="text" name="btype" value="normal" readonly>
+        <input type="number" name="bParentNO" value="${bno}" hidden>
+        <input type="text" name="btype" value="normal" hidden>
         <input type="submit" value="답글쓰기">
     </form>
 </body>

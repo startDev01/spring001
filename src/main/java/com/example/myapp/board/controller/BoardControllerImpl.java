@@ -24,8 +24,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.example.myapp.board.service.BoardService;
 import com.example.myapp.board.vo.BoardVO;
-import com.example.myapp.board.vo.Criteria;
-import com.example.myapp.board.vo.PageMakeVO;
 
 //import com.spring.member.service.MemberService;
 //import com.spring.member.vo.MemberVO;
@@ -41,9 +39,8 @@ public class BoardControllerImpl implements BoardController {
 	@Autowired
 	MemberVO memberVO;
 
+	// 조회수 중복 방지용 글 번호 배열
 	ArrayList<Integer> bnoArr;
-//	@Autowired
-//	PageMakeVO pageMake;
 
 	// 게시판 목록(FIX)
 	@Override
@@ -70,30 +67,6 @@ public class BoardControllerImpl implements BoardController {
 		mav.addObject("boardList", boardList);
 		return mav;
 	}
-
-	// 게시판 목록(페이징)
-//	@Override
-//	@RequestMapping(value="/board/listBoard.do", method=RequestMethod.GET)
-//	public ModelAndView listBoardPaging(Criteria cri, HttpServletRequest request, HttpServletResponse response) throws Exception {
-//		String viewName = getViewName(request);
-//		// 게시글 목록 출력
-//		// List boardList = boardService.listBoard();
-//		List boardList = boardService.getListPaging(cri);
-//		List noticeList = boardService.noticeListBoard();
-//
-//		int total = boardService.getTotal();
-//
-//		System.out.println(viewName);
-//
-//		PageMakeVO pageMake = new PageMakeVO(cri, total);
-//
-//		ModelAndView mav = new ModelAndView(viewName);
-//		mav.addObject("noticeList", noticeList);
-//		mav.addObject("boardList", boardList);
-//		mav.addObject("pageMaker", pageMake);
-//
-//		return mav;
-//	}
 
 	@Override
 	@RequestMapping(value="/board/viewArticle.do", method=RequestMethod.GET)
@@ -281,7 +254,8 @@ public class BoardControllerImpl implements BoardController {
 	@RequestMapping(value = "/board/replyArticle.do", method = RequestMethod.POST)
 	public ModelAndView replyArticle(@ModelAttribute("boardVO") BoardVO boardVO,
 									 HttpServletRequest request, HttpServletResponse response) throws Exception {
-		String viewName = getViewName(request);
+		String viewName = "/addArticle";
+		System.out.println("viewName 이름 : " + viewName);
 
 		// 넘어온 객체 boardVO 값 확인
 		// tip) JSP에서 태그를 disabled로 비활성화 시키면 값도 안넘어온다..
@@ -300,7 +274,7 @@ public class BoardControllerImpl implements BoardController {
 	@Override
 	@RequestMapping(value = "/board/replyArticle", method = RequestMethod.GET)
 	public ModelAndView replyArticle(@RequestParam("bno") int bno,
-										 HttpServletRequest request, HttpServletResponse response) throws Exception {
+									 HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String viewName = getViewName(request);
 
 
