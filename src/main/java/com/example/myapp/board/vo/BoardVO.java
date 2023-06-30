@@ -15,6 +15,7 @@ import java.sql.Date;
 public class BoardVO {
 	private int rownum;
 	private int level;
+	private int LVL;
 	private int bno;
 	private int bParentNO;
 	private String bname;

@@ -11,7 +11,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.example.myapp.board.vo.BoardVO;
-import com.example.myapp.board.vo.Criteria;
 
 //import com.spring.member.vo.MemberVO;
 

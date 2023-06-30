@@ -5,7 +5,7 @@
 <configuration>
 	<typeAliases>
 		<typeAlias type="com.example.myapp.board.vo.BoardVO"  alias="boardVO" />
-		<typeAlias type="com.example.myapp.board.vo.Criteria"  alias="Criteria" />
+		<typeAlias type="com.example.myapp.board.vo.PagingVO"  alias="pagingVO" />
 		<typeAlias type="com.example.myapp.member.vo.MemberVO"  alias="memberVO" />
 	</typeAliases>
 </configuration>

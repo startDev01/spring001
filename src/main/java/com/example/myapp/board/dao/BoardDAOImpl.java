@@ -2,6 +2,7 @@ package com.example.myapp.board.dao;
 
 import java.util.List;
 
+import com.example.myapp.board.vo.PagingVO;
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Repository;
 
 import com.example.myapp.board.vo.BoardVO;
 //import com.spring.member.vo.MemberVO;
-import com.example.myapp.board.vo.Criteria;
 
 @Repository("boardDAO")
 public class BoardDAOImpl implements BoardDAO {
@@ -76,12 +76,6 @@ public class BoardDAOImpl implements BoardDAO {
 	}
 
 	@Override
-	public List<BoardVO> getListPaging(Criteria cri) {
-		List<BoardVO> boardVO = sqlSession.selectList("mapper.board.getListPaging", cri); 
-		return boardVO;
-	}
-	
-	@Override
 	public int getTotal() {
 		int total = sqlSession.selectOne("mapper.board.getTotal");
 		return total;
@@ -91,13 +85,15 @@ public class BoardDAOImpl implements BoardDAO {
 		System.out.println("게시판 글 마지막 번호 출력");
 		return sqlSession.selectOne("mapper.board.selectNewArticleNO");
 	}
-	
-	
-	
-	
-	
 
-//	@Override
+	@Override
+	public List selectAllBoardListWithPaging(PagingVO pagingVO) throws DataAccessException {
+		System.out.println("!! 페이징 !! 게시판 글 목록 호출");
+		System.out.println(pagingVO);
+		return sqlSession.selectList("mapper.board.selectAllBoardListWithPaging", pagingVO);
+	}
+
+	//	@Override
 //	public int insertMember(MemberVO memberVO) throws DataAccessException {
 //		int result = sqlSession.insert("mapper.member.insertMember", memberVO);
 //		return result;

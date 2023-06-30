@@ -6,7 +6,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" type="text/css" href="/resources/main.css">
+    <link rel="stylesheet" type="text/css" href="/resources/style/main.css">
     <style>
         input {
             font-size: 40px;
@@ -68,6 +68,11 @@
             color: green;
         }
 
+        .no-uline { text-decoration: none; font-size: 24px;}
+        .sel-page { text-decoration: none; color: red !important; font-size: 24px;}
+        .cls1 {text-decoration: none;}
+        .cls2 {text-align: center; font-size: 30px;}
+
         a:link {
             color: black;
             text-decoration: none;
@@ -87,6 +92,8 @@
             background-color: #cdd5ec;
         }
     </style>
+
+    <c:set var="ContextPath" value="${pageContext.request.contextPath}" />
 
     <!-- jQuery 사용!!! -> $ <- -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
@@ -144,8 +151,8 @@
             <td class="bnameAlign" align="left" width="55%">
                 <span class="startSpan"></span>
                 <c:choose>
-                    <c:when test="${board.level > 1}">
-                        <c:forEach begin="1" end="${board.level}" step="1">
+                    <c:when test="${board.LVL > 1}">
+                        <c:forEach begin="1" end="${board.LVL}" step="1">
                             <span class="endSpan"></span>
                         </c:forEach>
 
@@ -184,8 +191,75 @@
             <td width="15%">${board.bwriter}</td>
         </tr>
         <c:set var="num" value="${num-1 }"></c:set>
+
     </c:forEach>
 </table>
+
+<%-- 페이징 --%>
+<c:if test="${totArticles != null}">
+    <c:choose>
+        <%-- 총 게시물이 100개 이상일때 - 섹션이 10개 넘게 표시될때 --%>
+        <c:when test="${totArticles > 100}">
+            <c:forEach var="page" begin="1" end="${totArticles / 10 + 1}" step="1">
+                <c:if test="${section > 1 && page == 1}">
+                    <a class="no-uline" href="${ContextPath}/board/listBoard.do?section=${section-1}&pageNum=${10}">&nbsp;prev</a>
+                </c:if>
+
+                <c:if test="${page <= 10}">
+                    <%-- 게시글 총 개수와 표시되는 페이지 비교 --%>
+                    <c:if test="${(totArticles / 10) + 1 > ((section-1)*10+page)}">
+                        <%-- next 표시를 위한 변수 지정 --%>
+                        <c:if test="${pageCount == null}">
+                            <c:set var="pageCount" value="0"></c:set>
+                        </c:if>
+                        <c:if test="${pageCount != null}">
+                            <c:set var="pageCount" value="${pageCount + 1}"></c:set>
+                        </c:if>
+
+                        <%-- 현재 페이지 표시 --%>
+                        <c:choose>
+                            <c:when test="${page==pageNum}">
+                                <a class="sel-page" href="${ContextPath}/board/listBoard.do?section=${section}&pageNum=${page}">${(section-1)*10+page}</a>
+                            </c:when>
+
+                            <c:otherwise>
+                                <a class="no-uline" href="${ContextPath}/board/listBoard.do?section=${section}&pageNum=${page}">${(section-1)*10+page}</a>
+                            </c:otherwise>
+                        </c:choose>
+                    </c:if>
+                </c:if>
+
+                <c:if test="${page==10}">
+                    <%-- pageCount 변수에 따라 next 표시 설정 --%>
+                    <c:if test="${pageCount > 9}">
+                        <a class="no-uline" href="${ContextPath}/board/listBoard.do?section=${section+1}&pageNum=${1}">&nbsp;next</a>
+                    </c:if>
+                </c:if>
+            </c:forEach>
+        </c:when>
+
+        <%-- 총 게시물이 100개 일때 - 섹션이 10개가 표시될때 --%>
+        <c:when test="${totArticles == 100}">
+            <c:forEach var="page" begin="1" end="10" step="1">
+                <a class="no-uline" href="#">${page} </a>
+            </c:forEach>
+        </c:when>
+
+        <%-- 총 게시물이 100개 이하일때 - 섹션이 10개 넘게 표시되지 않을때 --%>
+        <c:when test="${totArticles < 100}">
+            <c:forEach var="page" begin="1" end="${totArticles / 10 + 1}" step="1">
+                <c:choose>
+                    <c:when test="${page==pageNum}">
+                        <a class="sel-page" href="${ContextPath}/board/listBoard.do?section=${section}&pageNum=${page}">${page}</a>
+                    </c:when>
+                    <c:otherwise>
+                        <a class="no-uline" href="${ContextPath}/board/listBoard.do?section=${section}&pageNum=${page}">${page}</a>
+                    </c:otherwise>
+                </c:choose>
+            </c:forEach>
+        </c:when>
+    </c:choose>
+</c:if>
 <br>
 <div align="center">
     <%--<a class="articleForm" href="${pageContext.request.contextPath}/board/articleForm.do" align="center">글쓰기</a>--%>

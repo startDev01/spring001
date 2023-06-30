@@ -8,7 +8,7 @@
 <html>
   <head>
     <meta charset="UTF-8">
-      <link rel="stylesheet" type="text/css" href="/resources/main.css">
+      <link rel="stylesheet" type="text/css" href="/resources/style/main.css">
     <style>
       #container {
         width: 100%;

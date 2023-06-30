@@ -2,6 +2,7 @@ package com.example.myapp.board.service;
 
 import java.util.List;
 
+import com.example.myapp.board.vo.PagingVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,6 @@ import com.example.myapp.board.dao.BoardDAO;
 import com.example.myapp.board.vo.BoardVO;
 //import com.spring.member.dao.MemberDAO;
 //import com.spring.member.vo.MemberVO;
-import com.example.myapp.board.vo.Criteria;
 
 @Service("boardService")
 @Transactional(propagation = Propagation.REQUIRED)
@@ -81,20 +81,17 @@ public class BoardServiceImpl implements BoardService {
 	}
 
 	@Override
-	public List<BoardVO> getListPaging(Criteria cri) {
-		List<BoardVO> boardVO = boardDAO.getListPaging(cri);
-		System.out.println("게시판 목록 페이징 메소드");
-		return boardVO;
-	}
-
-	@Override
 	public int getTotal() {
 		int total = boardDAO.getTotal();
 		return total;
 	}
 
+	@Override
+	public List selectAllBoardListWithPaging(PagingVO pagingVO) throws DataAccessException {
+		return boardDAO.selectAllBoardListWithPaging(pagingVO);
+	}
 
-//	@Override
+	//	@Override
 //	public int addMember(MemberVO member) throws DataAccessException {
 //		return memberDAO.insertMember(member);
 //	}

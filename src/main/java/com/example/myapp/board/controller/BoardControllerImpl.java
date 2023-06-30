@@ -1,9 +1,7 @@
 package com.example.myapp.board.controller;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import javax.servlet.Filter;
 import javax.servlet.http.Cookie;
@@ -11,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.example.myapp.board.vo.PagingVO;
 import com.example.myapp.member.vo.MemberVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -38,6 +37,8 @@ public class BoardControllerImpl implements BoardController {
 	BoardVO boardVO;
 	@Autowired
 	MemberVO memberVO;
+	@Autowired
+	PagingVO pagingVO;
 
 	// 조회수 중복 방지용 글 번호 배열
 	ArrayList<Integer> bnoArr;
@@ -47,9 +48,37 @@ public class BoardControllerImpl implements BoardController {
 	@RequestMapping(value="/board/listBoard.do" ,method = RequestMethod.GET)
 	public ModelAndView listBoard(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String viewName = getViewName(request);
+		System.out.println("listBoard 메소드 실행");
+
+		//// 페이징 처리 부분
+		String _section = request.getParameter("section");
+		String _pageNum = request.getParameter("pageNum");
+
+		// 최초 요청시 section 값과 pageNum 값이 없다면 각 1로 초기화
+		int section = Integer.parseInt(((_section == null) ? "1" : _section));
+		int pageNum = Integer.parseInt(((_pageNum == null) ? "1" : _pageNum));
+
+		System.out.println("페이징 _값 : " + _section + ", " + _pageNum);
+		System.out.println("페이징 값 : " + section + ", " + pageNum);
+
+		// PagingVO에 값 저장
+		pagingVO.setSection(section);
+		pagingVO.setPageNum(pageNum);
+
+		System.out.println("페이징VO에 넘어간 값 : " + pagingVO.getSection() + ", " + pagingVO.getPageNum());
 
 		// 일반 게시글 목록 서비스 호출
-		List boardList = boardService.listBoard();
+		List boardList = boardService.selectAllBoardListWithPaging(pagingVO);
+		System.out.println("boardList 리스트 값 : " + boardList);
+
+		// 기존 리스트 출력 (페이징 X)
+//		List boardList = boardService.listBoard();
+
+		// 게시글 최대 수
+		int totArticles = boardService.getTotal();
+		System.out.println("totArticles(게시글 수) : " + totArticles);
+
+		//// 페이징 end
 
 		// 공지 게시글 목록 서비스 호출
 		List noticeList = boardService.noticeListBoard();
@@ -63,6 +92,9 @@ public class BoardControllerImpl implements BoardController {
 		}
 
 		ModelAndView mav = new ModelAndView(viewName);
+		mav.addObject("totArticles", totArticles);
+		mav.addObject("section", section);
+		mav.addObject("pageNum", pageNum);
 		mav.addObject("noticeList", noticeList);
 		mav.addObject("boardList", boardList);
 		return mav;
