@@ -22,6 +22,7 @@ public class BoardVO {
 	private int bcount;
 	private String bwriter;
 	private String bdetail;
+	private String bImageFileName;
 	private Date bwritedate;
 	private String btype;
 }

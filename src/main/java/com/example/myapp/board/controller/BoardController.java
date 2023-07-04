@@ -25,8 +25,8 @@ public interface BoardController {
 	public ModelAndView viewArticle(@RequestParam("bno") int bno, HttpServletRequest request,
 			HttpServletResponse response) throws Exception;
 
-	public ModelAndView createArticle(@RequestParam("bname") String bname, @RequestParam("bwriter") String bwriter,
-			@RequestParam("bdetail") String bdetail, @RequestParam("btype") String btype,
+	public ModelAndView createArticle(@ModelAttribute("boardVO") BoardVO boardVO,
+									  MultipartHttpServletRequest multipartRequest,
 									  HttpServletRequest request, HttpServletResponse response)
 			throws Exception;
 

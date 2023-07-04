@@ -23,9 +23,16 @@
 <body>
 		<p>글번호 <input type="text" name="bno" value="${articleVO.bno}" disabled>	
 		<p>작성자 <input type="text" value="${articleVO.bwriter}" disabled>	
-		<p>조회수 <input type="text" value="${articleVO.bcount}" disabled>	
-		<p>제목 <input type="text" value="${articleVO.bname}" disabled>	
-		<p>내용 <textarea cols="60" rows="20" style="resize: none;" disabled>${articleVO.bdetail}</textarea>	<br>
+		<p>조회수 <input type="text" value="${articleVO.bcount}" disabled>
+		<p>제목 <input type="text" value="${articleVO.bname}" disabled>
+		<p>내용 <textarea cols="60" rows="20" style="resize: none;" disabled>${articleVO.bdetail}</textarea> <br>
+		<c:if test="${imageMap != null}">
+			<p>이미지</p>
+		</c:if>
+		<c:forEach var="imageFileName" items="${imageMap.imageList}">
+<%--			<img src="<c:url value="/resources/images/${imageFileName}"/>" alt="" width="48">  <br>--%>
+			<img src="${pageContext.request.contextPath}/download?imageFileName=${imageFileName}" alt="" width="48">  <br>
+		</c:forEach>
 
 		<a href="${pageContext.request.contextPath}/board/replyArticle?bno=${articleVO.bno}">답글달기</a>
 		<a href="${pageContext.request.contextPath}/board/updateArticleForm?bno=${articleVO.bno}">글 수정하기</a>

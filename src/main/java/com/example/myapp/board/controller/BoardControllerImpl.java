@@ -1,6 +1,8 @@
 package com.example.myapp.board.controller;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.OutputStream;
 import java.util.*;
 
 import javax.servlet.Filter;
@@ -30,7 +32,8 @@ import com.example.myapp.board.vo.BoardVO;
 
 @Controller("boardController")
 public class BoardControllerImpl implements BoardController {
-	private static final String ARTICLE_IMAGE_REPO = "C:\\board\\article_image";
+//	private static final String CURR_IMAGE_REPO_PATH = "C:\\dev\\repo";
+	private static final String CURR_IMAGE_REPO_PATH = "C:\\dev\\IntelliJ_P\\spring001\\src\\main\\webapp\\resources\\images";
 	@Autowired
 	private BoardService boardService;
 	@Autowired
@@ -149,29 +152,72 @@ public class BoardControllerImpl implements BoardController {
 		// 게시글 조회
 		BoardVO articleVO = boardService.selectArticle(bno);
 
+		// 이미지 불러오기
+		System.out.println("게시글의 이미지 정보 : " + articleVO.getBImageFileName());
+		String imageFileName = null;
+		String[] res = null;
+		Map imageMap = null;
+
+		// 다중 이미지 이름 분리
+		if(articleVO.getBImageFileName() != null) {
+			imageFileName = articleVO.getBImageFileName();
+			res = imageFileName.split("%%");
+
+			List<String> imageList = new ArrayList<String>();
+			imageMap = new HashMap();
+			for (String s : res) {
+				imageList.add(s);
+			}
+
+			imageMap.put("imageList", imageList);
+		}
+
 		System.out.println(articleVO);
+
 
 		ModelAndView mav = new ModelAndView(viewName);
 		mav.setViewName(viewName);
 		mav.addObject("articleVO", articleVO);
+
+		if(imageMap != null)
+			mav.addObject("imageMap", imageMap);
 
 		return mav;
 	}
 
 	@Override
 	@RequestMapping(value="/board/addArticle.done", method=RequestMethod.POST)
-	public ModelAndView createArticle(@RequestParam("bname") String bname,
-									  @RequestParam("bwriter") String bwriter,
-									  @RequestParam("bdetail") String bdetail,
-									  @RequestParam("btype") String btype,
+	public ModelAndView createArticle(@ModelAttribute("boardVO") BoardVO boardVO,
+									  MultipartHttpServletRequest multipartRequest,
 									  HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String viewName = getViewName(request);
 		System.out.println("글쓰기");
+		System.out.println("boardVO 객체 값 : " + boardVO);
 
-		boardVO.setBname(bname);
-		boardVO.setBwriter(bwriter);
-		boardVO.setBdetail(bdetail);
-		boardVO.setBtype(btype);
+		// 파일 업로드(수정중)
+		// 매개변수 정보와 파일 정보를 저장할 Map 생성
+		Map map = new HashMap();
+		Enumeration enu = multipartRequest.getParameterNames();
+
+		while (enu.hasMoreElements()) {
+			String name = (String) enu.nextElement();
+			String value = multipartRequest.getParameter(name);
+//			System.out.println("name : " + name + ", value : " + value);
+			map.put(name, value);
+		}
+
+		List<String> fileList = fileProcess(multipartRequest);
+		map.put("fileList", fileList);
+
+		String fileNameForDB = "";
+
+		for(String s : fileList) {
+			fileNameForDB += s + "%%";
+			System.out.println("fileList : " + s);
+		}
+
+		// boardVO에 이미지 파일 이름 지정
+		boardVO.setBImageFileName(fileNameForDB);
 
 		int bno = boardService.selectNewArticleBno();
 
@@ -184,6 +230,8 @@ public class BoardControllerImpl implements BoardController {
 		ModelAndView mav = new ModelAndView(viewName);
 		mav.setViewName(viewName);
 		mav.addObject("boardVO", boardVO);
+
+		mav.addObject("map", map);
 
 		return mav;
 	}
@@ -352,6 +400,32 @@ public class BoardControllerImpl implements BoardController {
 		return mav;
 	}
 
+	// 미사용 메소드(임시)
+	@RequestMapping("/download")
+	public void download(@RequestParam("imageFileName") String imageFileName,
+						 HttpServletResponse response) throws Exception {
+		OutputStream out = response.getOutputStream();
+		String downFile = CURR_IMAGE_REPO_PATH + "\\" + imageFileName;
+		File file = new File(downFile);
+
+		response.setHeader("Cache-Control", "no-cache");
+		response.addHeader("Content-disposition", "attachment; fileName=" + imageFileName);
+
+		FileInputStream in = new FileInputStream(file);
+		byte[] buffer = new byte[1024 * 8];
+
+		while (true) {
+			int count = in.read(buffer);
+			if(count == -1) break;
+			out.write(buffer, 0, count);
+		}
+
+		// GC 미작동?? 수동으로 메모리 해제
+		in.close();
+		out.close();
+
+	}
+
 	private String upload(MultipartHttpServletRequest multipartRequest) throws Exception {
 		String imageFileName = null;
 		Iterator<String> fileNames = multipartRequest.getFileNames();
@@ -359,17 +433,49 @@ public class BoardControllerImpl implements BoardController {
 			String fileName = fileNames.next();
 			MultipartFile mFile = multipartRequest.getFile(fileName);
 			imageFileName = mFile.getOriginalFilename();
-			File file = new File(ARTICLE_IMAGE_REPO + "\\" + "temp" + "\\" + fileNames);
+			File file = new File(CURR_IMAGE_REPO_PATH + "\\" + "temp" + "\\" + fileNames);
 			if(mFile.getSize() != 0) {
 				if(!file.exists()) {
 					file.getParentFile().mkdirs();
-					mFile.transferTo(new File(ARTICLE_IMAGE_REPO + "\\" + "temp" + "\\" + imageFileName));
+					mFile.transferTo(new File(CURR_IMAGE_REPO_PATH + "\\" + "temp" + "\\" + imageFileName));
 				}
 			}
 		}
 
 		// 리턴값 확인 요망
 		return imageFileName;
+	}
+
+	private List<String> fileProcess(MultipartHttpServletRequest multipartRequest) throws Exception {
+		List<String> fileList = new ArrayList<String>();
+
+		// 첨부된 파일 이름 가져오기
+		Iterator<String> fileNames = multipartRequest.getFileNames();
+
+		// 업로드한 파일이 더 이상 없을때까지 반복
+		while (fileNames.hasNext()) {
+			String fileName = fileNames.next();
+
+			// 파일 이름에 대한 MultipartFile 객체를 가져옴
+			MultipartFile mFile = multipartRequest.getFile(fileName);
+			String originalFileName = mFile.getOriginalFilename();
+			fileList.add(originalFileName);
+			File file = new File(CURR_IMAGE_REPO_PATH + "\\" + fileName);
+
+			// 경로에 파일이 없으면 그 경로에 해당하는 디렉토리, 파일 생성
+			if(mFile.getSize()!=0) {
+				if(!file.exists()) {
+					if(file.getParentFile().mkdirs()) {
+						System.out.println("파일이 생성되었습니다.");
+						file.createNewFile();
+					}
+				}
+				// 파일 전송
+				mFile.transferTo(new File(CURR_IMAGE_REPO_PATH + "\\" + originalFileName));
+			}
+		}
+		// 파일 이름이 저장된 fileList 반환
+		return fileList;
 	}
 
 	private String getViewName(HttpServletRequest request) throws Exception {

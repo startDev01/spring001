@@ -190,7 +190,7 @@
             <td width="8%">${board.bcount}</td>
             <td width="15%">${board.bwriter}</td>
         </tr>
-        <c:set var="num" value="${num-1 }"></c:set>
+        <c:set var="num" value="${num-1}"></c:set>
 
     </c:forEach>
 </table>

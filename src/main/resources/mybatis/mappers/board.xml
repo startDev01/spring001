@@ -121,8 +121,8 @@
 	</insert>-->
 	<insert id="createArticle" parameterType="BoardVO">
 		<![CDATA[
-			insert into boardtwo (bno, bname, bwriter, bdetail, btype)
-			values (#{bno}, #{bname}, #{bwriter}, #{bdetail}, #{btype})
+			insert into boardtwo (bno, bname, bwriter, bdetail, bImageFileName, btype)
+			values (#{bno}, #{bname}, #{bwriter}, #{bdetail}, #{bImageFileName} , #{btype})
 		]]>
 	</insert>
 
