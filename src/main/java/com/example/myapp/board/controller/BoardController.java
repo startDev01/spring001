@@ -35,8 +35,8 @@ public interface BoardController {
 	public ModelAndView updateArticleForm(@RequestParam("bno") int bno,
 			HttpServletRequest request, HttpServletResponse response) throws Exception;
 
-	public ModelAndView updateArticle(@RequestParam("bno") int bno,
-			@RequestParam("bname") String bname, @RequestParam("bdetail") String bdetail,
+	public ModelAndView updateArticle(@ModelAttribute("boardVO") BoardVO boardVO,
+									  MultipartHttpServletRequest multipartRequest,
 			HttpServletRequest request, HttpServletResponse response) throws Exception;
 	
 	public ModelAndView deleteArticle(@RequestParam("bno")int bno,

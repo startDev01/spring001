@@ -23,21 +23,42 @@
 	.submit-btn:hover {
 		cursor: pointer;
 	}
+	.update-btn {
+		height: 48px;
+		position: relative;
+		bottom: 15px;
+		font-size: 16px;
+	}
+	.img-box {
+		display: block;
+		margin-bottom: 10px;
+	}
 </style>
 
 <meta charset="UTF-8">
 <title>게시판 수정</title>
 </head>
 <body>
-	<form action="${contextPath}/board/updateArticle?bno=${articleVO.bno}" method="post">
+	<form action="${contextPath}/board/updateArticle?bno=${articleVO.bno}" method="post" enctype="multipart/form-data">
 		<p>글번호 <input type="text" name="bno" value="${articleVO.bno}" disabled>
-		<p>작성자 <input type="text" value="${articleVO.bwriter}" disabled>	
+		<p>작성자 <input type="text" value="${articleVO.bwriter}" disabled>
 		<p>조회수 <input type="text" value="${articleVO.bcount}" disabled>
 		<p>제목 <input type="text" name="bname" value="${articleVO.bname}">
 		<%-- <p>내용 <input type="text" name="bdetail" value="${articleVO.bdetail}"> --%>
-		<p>내용 <textarea cols="60" rows="20" name="bdetail" style="resize: none;">${articleVO.bdetail}</textarea>	
+		<p>내용 <textarea cols="60" rows="8" name="bdetail" style="resize: none;">${articleVO.bdetail}</textarea>
 		
 		<br>
+
+		<c:if test="${imageMap != null}">
+		<p>이미지</p>
+		</c:if>
+		<c:forEach var="imageFileName" items="${imageMap.imageList}" varStatus="status">
+			<%--			<img src="<c:url value="/resources/images/${imageFileName}"/>" alt="" width="48">  <br>--%>
+			<div class="img-box">
+				<input type="file" class="update-btn" name="file${status.count}" accept=".jpg, .jpeg, .png">
+				<img src="${pageContext.request.contextPath}/download?imageFileName=${imageFileName}" alt="" width="48">  <br>
+			</div>
+		</c:forEach>
 		
 		<input class="submit-btn" type="submit" value="수정하기">
 		<a href="${pageContext.request.contextPath}/board/listBoard.do">게시판 목록</a>

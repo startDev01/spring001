@@ -33,7 +33,7 @@ import com.example.myapp.board.vo.BoardVO;
 @Controller("boardController")
 public class BoardControllerImpl implements BoardController {
 //	private static final String CURR_IMAGE_REPO_PATH = "C:\\dev\\repo";
-	private static final String CURR_IMAGE_REPO_PATH = "C:\\dev\\IntelliJ_P\\spring001\\src\\main\\webapp\\resources\\images";
+private static final String CURR_IMAGE_REPO_PATH = "C:\\dev\\IntelliJ_P\\spring001\\src\\main\\webapp\\resources\\images";
 	@Autowired
 	private BoardService boardService;
 	@Autowired
@@ -275,28 +275,103 @@ public class BoardControllerImpl implements BoardController {
 		// 해당 bno의 게시글 조회
 		BoardVO articleVO = boardService.selectArticle(bno);
 
+		// 이미지 불러오기
+		System.out.println("게시글의 이미지 정보 : " + articleVO.getBImageFileName());
+		String imageFileName = null;
+		String[] res = null;
+		Map imageMap = null;
+
+		// 다중 이미지 이름 분리
+		if(articleVO.getBImageFileName() != null) {
+			imageFileName = articleVO.getBImageFileName();
+			res = imageFileName.split("%%");
+
+			List<String> imageList = new ArrayList<String>();
+			imageMap = new HashMap();
+			for (String s : res) {
+				imageList.add(s);
+			}
+
+			imageMap.put("imageList", imageList);
+		}
+
 		ModelAndView mav = new ModelAndView(viewName);
 		mav.setViewName(viewName);
 		mav.addObject("articleVO", articleVO);
+
+		if(imageMap != null)
+			mav.addObject("imageMap", imageMap);
 
 		return mav;
 	}
 
 	@Override
 	@RequestMapping(value="/board/updateArticle", method=RequestMethod.POST)
-	public ModelAndView updateArticle(@RequestParam("bno") int bno,
-									  @RequestParam("bname") String bname,
-									  @RequestParam("bdetail") String bdetail,
+	public ModelAndView updateArticle(@ModelAttribute("boardVO") BoardVO boardVO,
+									  MultipartHttpServletRequest multipartRequest,
 									  HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String viewName = getViewName(request);
 
-		// boardVO에 데이터 저장 후 서비스 호출
-		boardVO.setBno(bno);
-		boardVO.setBname(bname);
-		boardVO.setBdetail(bdetail);
-
 		System.out.println("boardVO 객체 확인용 : " + boardVO);
+		int bno = boardVO.getBno();
+		boardVO = boardService.selectArticle(bno);
 
+		Map map = new HashMap();
+
+		// 업로드 된 파일 리스트 생성
+		List<String> fileList = fileProcess(multipartRequest);
+
+		map.put("fileList", fileList);
+
+		String fileNameForDB = "";
+		String tempFileName = boardVO.getBImageFileName();
+
+		// 이미지 불러오기
+		System.out.println("수정글의 이미지 정보 : " + boardVO.getBImageFileName());
+		String imageFileName = null;
+		List<String> imageList = null;
+		String[] res = null;
+
+		// 다중 이미지 이름 분리
+		if(boardVO.getBImageFileName() != null) {
+			imageFileName = boardVO.getBImageFileName();
+			res = imageFileName.split("%%");
+
+			imageList = new ArrayList<String>();
+			for (String s : res) {
+				imageList.add(s);
+			}
+		}
+
+		System.out.println("기존 imageList : " + imageList.toString());
+
+		int nullCount = 0;
+		int count = 0;
+		for(String s : fileList) {
+			// 이미지가 변경되지 않았을 때
+			if(s == null || s.equals("")) {
+				nullCount++;
+				s = imageList.get(count);
+				System.out.println("이미지 값 없음 " + nullCount);
+			}
+			System.out.println("fileList : " + s);
+
+			// 이미지가 아무것도 변경되지 않았다면 데이터 유지, 탈출
+			if(nullCount == 3) {
+				fileNameForDB = boardVO.getBImageFileName();
+				break;
+			}
+			// 이미지 파일 이름 추가 대입, 구분자 생성
+			fileNameForDB += s + "%%";
+			count++;
+		}
+		System.out.println("수정할 fileNameForDB : " + fileNameForDB);
+
+		// 이미지가 변경되었을 경우 boardVO에 이미지 파일 이름 지정
+		if(!tempFileName.equals(fileNameForDB))
+			boardVO.setBImageFileName(fileNameForDB);
+
+		// 데이터베이스 테이블 수정
 		boardService.updateArticle(boardVO);
 
 		ModelAndView mav = new ModelAndView(viewName);
@@ -400,7 +475,7 @@ public class BoardControllerImpl implements BoardController {
 		return mav;
 	}
 
-	// 미사용 메소드(임시)
+	// 이미지 출력을 위한 메소드
 	@RequestMapping("/download")
 	public void download(@RequestParam("imageFileName") String imageFileName,
 						 HttpServletResponse response) throws Exception {

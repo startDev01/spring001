@@ -25,7 +25,7 @@
 		<p>작성자 <input type="text" value="${articleVO.bwriter}" disabled>	
 		<p>조회수 <input type="text" value="${articleVO.bcount}" disabled>
 		<p>제목 <input type="text" value="${articleVO.bname}" disabled>
-		<p>내용 <textarea cols="60" rows="20" style="resize: none;" disabled>${articleVO.bdetail}</textarea> <br>
+		<p>내용 <textarea cols="60" rows="8" style="resize: none;" disabled>${articleVO.bdetail}</textarea> <br>
 		<c:if test="${imageMap != null}">
 			<p>이미지</p>
 		</c:if>

@@ -150,14 +150,15 @@
 	</update>
 	
 	<update id="updateArticle" parameterType="boardVO">
-		<![CDATA[
 			UPDATE boardtwo
 			SET
 			bname = #{bname},
 			bdetail = #{bdetail}
+			<if test="bImageFileName!='' and bImageFileName!=null">
+				,bImageFileName=#{bImageFileName}
+			</if>
 			WHERE
 			bno = #{bno}
-    ]]>
 	</update>
 	
 	<delete id="deleteArticle" parameterType="int">
