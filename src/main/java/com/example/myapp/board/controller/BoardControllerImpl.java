@@ -194,30 +194,36 @@ private static final String CURR_IMAGE_REPO_PATH = "C:\\dev\\IntelliJ_P\\spring0
 		System.out.println("글쓰기");
 		System.out.println("boardVO 객체 값 : " + boardVO);
 
-		// 파일 업로드(수정중)
-		// 매개변수 정보와 파일 정보를 저장할 Map 생성
-		Map map = new HashMap();
-		Enumeration enu = multipartRequest.getParameterNames();
-
-		while (enu.hasMoreElements()) {
-			String name = (String) enu.nextElement();
-			String value = multipartRequest.getParameter(name);
-//			System.out.println("name : " + name + ", value : " + value);
-			map.put(name, value);
-		}
-
+		// fileProcess 메소드로 업로드된 파일리스트 fileList로 담기
 		List<String> fileList = fileProcess(multipartRequest);
-		map.put("fileList", fileList);
 
 		String fileNameForDB = "";
 
+		int errorCount = 0;
 		for(String s : fileList) {
+			// 업로드된 이미지가 비어있을 경우
+			if(s.equals("")) {
+				errorCount++;
+				fileNameForDB += "";
+				System.out.println("fileList 비어있음 : " + s);
+				if(errorCount == fileList.size()) {
+					System.out.println("fileList가 전부 비어있음");
+					fileNameForDB = null;
+					break;
+				}
+				continue;
+			}
 			fileNameForDB += s + "%%";
 			System.out.println("fileList : " + s);
 		}
 
+		System.out.println("fileNameForDB의 값? : " + fileNameForDB);
+
 		// boardVO에 이미지 파일 이름 지정
-		boardVO.setBImageFileName(fileNameForDB);
+		if(fileNameForDB != null)
+			boardVO.setBImageFileName(fileNameForDB);
+		else
+			boardVO.setBImageFileName(null);
 
 		int bno = boardService.selectNewArticleBno();
 
@@ -230,8 +236,6 @@ private static final String CURR_IMAGE_REPO_PATH = "C:\\dev\\IntelliJ_P\\spring0
 		ModelAndView mav = new ModelAndView(viewName);
 		mav.setViewName(viewName);
 		mav.addObject("boardVO", boardVO);
-
-		mav.addObject("map", map);
 
 		return mav;
 	}
@@ -312,16 +316,18 @@ private static final String CURR_IMAGE_REPO_PATH = "C:\\dev\\IntelliJ_P\\spring0
 									  HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String viewName = getViewName(request);
 
-		System.out.println("boardVO 객체 확인용 : " + boardVO);
+		System.out.println("수정된 boardVO 객체 확인용 : " + boardVO);
+		String bname = boardVO.getBname();
+		String bdetail = boardVO.getBdetail();
+
 		int bno = boardVO.getBno();
 		boardVO = boardService.selectArticle(bno);
 
-		Map map = new HashMap();
+		boardVO.setBname(bname);
+		boardVO.setBdetail(bdetail);
 
 		// 업로드 된 파일 리스트 생성
 		List<String> fileList = fileProcess(multipartRequest);
-
-		map.put("fileList", fileList);
 
 		String fileNameForDB = "";
 		String tempFileName = boardVO.getBImageFileName();
@@ -332,8 +338,9 @@ private static final String CURR_IMAGE_REPO_PATH = "C:\\dev\\IntelliJ_P\\spring0
 		List<String> imageList = null;
 		String[] res = null;
 
-		// 다중 이미지 이름 분리
+		// 이미지가 업로드 되었을 경우에만 실행
 		if(boardVO.getBImageFileName() != null) {
+			// 다중 이미지 이름 분리
 			imageFileName = boardVO.getBImageFileName();
 			res = imageFileName.split("%%");
 
@@ -341,35 +348,37 @@ private static final String CURR_IMAGE_REPO_PATH = "C:\\dev\\IntelliJ_P\\spring0
 			for (String s : res) {
 				imageList.add(s);
 			}
-		}
 
-		System.out.println("기존 imageList : " + imageList.toString());
+			System.out.println("기존 imageList : " + imageList.toString());
 
-		int nullCount = 0;
-		int count = 0;
-		for(String s : fileList) {
-			// 이미지가 변경되지 않았을 때
-			if(s == null || s.equals("")) {
-				nullCount++;
-				s = imageList.get(count);
-				System.out.println("이미지 값 없음 " + nullCount);
+			int nullCount = 0;
+			int count = 0;
+			for(String s : fileList) {
+				if(count == 0)
+					System.out.println("fileList의 사이즈 : " + fileList.size());
+				// 이미지가 변경되지 않았을 때
+				if(s == null || s.equals("")) {
+					nullCount++;
+					s = imageList.get(count);
+					System.out.println("이미지 값 없음 " + nullCount);
+				}
+				System.out.println("fileList : " + s);
+
+				// 이미지가 아무것도 변경되지 않았다면 데이터 유지, 탈출
+				if(nullCount == fileList.size()) {
+					fileNameForDB = boardVO.getBImageFileName();
+					break;
+				}
+				// 이미지 파일 이름 추가 대입, 구분자 생성
+				fileNameForDB += s + "%%";
+				count++;
 			}
-			System.out.println("fileList : " + s);
+			System.out.println("수정할 fileNameForDB : " + fileNameForDB);
 
-			// 이미지가 아무것도 변경되지 않았다면 데이터 유지, 탈출
-			if(nullCount == 3) {
-				fileNameForDB = boardVO.getBImageFileName();
-				break;
-			}
-			// 이미지 파일 이름 추가 대입, 구분자 생성
-			fileNameForDB += s + "%%";
-			count++;
+			// 이미지가 변경되었을 경우 boardVO에 이미지 파일 이름 지정
+			if(!tempFileName.equals(fileNameForDB))
+				boardVO.setBImageFileName(fileNameForDB);
 		}
-		System.out.println("수정할 fileNameForDB : " + fileNameForDB);
-
-		// 이미지가 변경되었을 경우 boardVO에 이미지 파일 이름 지정
-		if(!tempFileName.equals(fileNameForDB))
-			boardVO.setBImageFileName(fileNameForDB);
 
 		// 데이터베이스 테이블 수정
 		boardService.updateArticle(boardVO);

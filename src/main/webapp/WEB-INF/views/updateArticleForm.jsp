@@ -33,6 +33,17 @@
 		display: block;
 		margin-bottom: 10px;
 	}
+
+	.disabledInput {
+		background-color: #ebebeb;
+		border-radius: 4px;
+		border: 1px solid gray;
+	}
+
+	.disabledInput:focus {
+		border: 1px solid gray;
+		outline: none;
+	}
 </style>
 
 <meta charset="UTF-8">
@@ -40,12 +51,14 @@
 </head>
 <body>
 	<form action="${contextPath}/board/updateArticle?bno=${articleVO.bno}" method="post" enctype="multipart/form-data">
-		<p>글번호 <input type="text" name="bno" value="${articleVO.bno}" disabled>
-		<p>작성자 <input type="text" value="${articleVO.bwriter}" disabled>
-		<p>조회수 <input type="text" value="${articleVO.bcount}" disabled>
+		<p>글번호 <input type="text" class="disabledInput" name="bno" value="${articleVO.bno}" readonly>
+		<p>작성자 <input type="text" class="disabledInput" name="bwriter" value="${articleVO.bwriter}" readonly>
+		<p>조회수 <input type="text" class="disabledInput" name="bcount" value="${articleVO.bcount}" readonly>
 		<p>제목 <input type="text" name="bname" value="${articleVO.bname}">
 		<%-- <p>내용 <input type="text" name="bdetail" value="${articleVO.bdetail}"> --%>
 		<p>내용 <textarea cols="60" rows="8" name="bdetail" style="resize: none;">${articleVO.bdetail}</textarea>
+		<input type="text" name="bwritedate" value="${articleVO.bwritedate}" hidden>
+		<input type="text" name="btype" value="${articleVO.btype}" hidden>
 		
 		<br>
 

@@ -120,10 +120,17 @@
     ]]>
 	</insert>-->
 	<insert id="createArticle" parameterType="BoardVO">
-		<![CDATA[
-			insert into boardtwo (bno, bname, bwriter, bdetail, bImageFileName, btype)
-			values (#{bno}, #{bname}, #{bwriter}, #{bdetail}, #{bImageFileName} , #{btype})
-		]]>
+		insert into boardtwo (bno, bname, bwriter, bdetail,
+							  <if test="bImageFileName!=null and bImageFileName!=''">
+								  bImageFileName,
+							  </if>
+
+							  btype)
+		values (#{bno}, #{bname}, #{bwriter}, #{bdetail},
+				<if test="bImageFileName!=null and bImageFileName!=''">
+					#{bImageFileName},
+				</if>
+		         #{btype})
 	</insert>
 
 	<insert id="replyArticle" parameterType="boardVO">
